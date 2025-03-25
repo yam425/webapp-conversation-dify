@@ -58,6 +58,7 @@ type IAnswerProps = {
   item: ChatItem
   feedbackDisabled: boolean
   onFeedback?: FeedbackFunc
+  onSuggestedQuestionClicked?: (message: string) => void
   isResponding?: boolean
   allToolIcons?: Record<string, string | Emoji>
 }
@@ -67,10 +68,11 @@ const Answer: FC<IAnswerProps> = ({
   item,
   feedbackDisabled = false,
   onFeedback,
+  onSuggestedQuestionClicked,
   isResponding,
   allToolIcons,
 }) => {
-  const { id, content, feedback, agent_thoughts, workflowProcess } = item
+  const { id, content, feedback, agent_thoughts, workflowProcess, suggestedQuestions } = item
   const isAgentMode = !!agent_thoughts && agent_thoughts.length > 0
 
   const { t } = useTranslation()
@@ -92,7 +94,7 @@ const Answer: FC<IAnswerProps> = ({
     return (
       <Tooltip
         selector={`user-feedback-${randomString(16)}`}
-        content={isLike ? '取消赞同' : '取消反对'}
+        content={isLike ? 'Cancel Like' : 'Cancel Dislike'}
       >
         <div
           className={'relative box-border flex items-center justify-center h-7 w-7 p-0.5 rounded-lg bg-white cursor-pointer text-gray-500 hover:text-gray-800'}
@@ -165,37 +167,49 @@ const Answer: FC<IAnswerProps> = ({
     </div>
   )
 
+  const renderSuggestedQuestions = () => {
+    if (!suggestedQuestions || suggestedQuestions.length === 0) return null;
+
+    return (
+      <div className="mt-2 flex flex-wrap gap-2">
+        {suggestedQuestions.map((question, index) => (
+          <div
+            key={index}
+            className="px-3 py-1 bg-white text-gray-700 text-sm rounded-md shadow-sm hover:bg-gray-50 cursor-pointer"
+            onClick={() => onSuggestedQuestionClicked?.(question)}
+          >
+            {question}
+          </div>
+        ))}
+      </div>
+    )
+  }
+
   return (
     <div key={id}>
-      <div className='flex items-start'>
+      <div className="flex items-start">
         <div className={`${s.answerIcon} w-10 h-10 shrink-0`}>
-          {isResponding
-            && <div className={s.typeingIcon}>
-              <LoadingAnim type='avatar' />
+          {isResponding && (
+            <div className={s.typeingIcon}>
+              <LoadingAnim type="avatar" />
             </div>
-          }
+          )}
         </div>
         <div className={`${s.answerWrap}`}>
           <div className={`${s.answer} relative text-sm text-gray-900`}>
             <div className={`ml-2 py-3 px-4 bg-gray-100 rounded-tr-2xl rounded-b-2xl ${workflowProcess && 'min-w-[480px]'}`}>
-              {workflowProcess && (
-                <WorkflowProcess data={workflowProcess} hideInfo />
+              {workflowProcess && <WorkflowProcess data={workflowProcess} hideInfo />}
+              {(isResponding && (isAgentMode ? (!content && (agent_thoughts || []).filter(item => !!item.thought || !!item.tool).length === 0) : !content)) ? (
+                <div className="flex items-center justify-center w-6 h-5">
+                  <LoadingAnim type="text" />
+                </div>
+              ) : (
+                isAgentMode ? agentModeAnswer : <Markdown content={content} />
               )}
-              {(isResponding && (isAgentMode ? (!content && (agent_thoughts || []).filter(item => !!item.thought || !!item.tool).length === 0) : !content))
-                ? (
-                  <div className='flex items-center justify-center w-6 h-5'>
-                    <LoadingAnim type='text' />
-                  </div>
-                )
-                : (isAgentMode
-                  ? agentModeAnswer
-                  : (
-                    <Markdown content={content} />
-                  ))}
+              {renderSuggestedQuestions()}
             </div>
-            <div className='absolute top-[-14px] right-[-14px] flex flex-row justify-end gap-1'>
+            <div className="absolute top-[-14px] right-[-14px] flex flex-row justify-end gap-1">
               {!feedbackDisabled && !item.feedbackDisabled && renderItemOperation()}
-              {/* User feedback must be displayed */}
               {!feedbackDisabled && renderFeedbackRating(feedback?.rating)}
             </div>
           </div>

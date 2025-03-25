@@ -1,6 +1,8 @@
 .answerIcon {
   position: relative;
-  background: url(./icons/robot.svg);
+  border-radius: 50%;
+  background: url("./icons/chatbot-ai.png");
+  background-size: cover;
 }
 
 .typeingIcon {

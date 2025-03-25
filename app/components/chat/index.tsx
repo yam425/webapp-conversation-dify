@@ -100,6 +100,10 @@ const Chat: FC<IChatProps> = ({
     }
   }
 
+  const handleSuggestedQuestionSend = (message: string) => {
+    onSend(message, [])
+  }
+
   const handleKeyUp = (e: any) => {
     if (e.code === 'Enter') {
       e.preventDefault()
@@ -130,6 +134,7 @@ const Chat: FC<IChatProps> = ({
               feedbackDisabled={feedbackDisabled}
               onFeedback={onFeedback}
               isResponding={isResponding && isLast}
+              onSuggestedQuestionClicked={handleSuggestedQuestionSend}
             />
           }
           return (
@@ -179,16 +184,17 @@ const Chat: FC<IChatProps> = ({
                 onChange={handleContentChange}
                 onKeyUp={handleKeyUp}
                 onKeyDown={handleKeyDown}
+                placeholder={t('app.chat.textAreaHint') ?? 'Ask me anything'}
                 autoSize
               />
               <div className="absolute bottom-2 right-2 flex items-center h-8">
-                <div className={`${s.count} mr-4 h-5 leading-5 text-sm bg-gray-50 text-gray-500`}>{query.trim().length}</div>
+                {/* <div className={`${s.count} mr-4 h-5 leading-5 text-sm bg-gray-50 text-gray-500`}>{query.trim().length}</div> */}
                 <Tooltip
                   selector='send-tip'
                   htmlContent={
                     <div>
-                      <div>{t('common.operation.send')} Enter</div>
-                      <div>{t('common.operation.lineBreak')} Shift Enter</div>
+                      <div>{t('common.operation.send')}: Enter</div>
+                      <div>{t('common.operation.lineBreak')}: Shift + Enter</div>
                     </div>
                   }
                 >

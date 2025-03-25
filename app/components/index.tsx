@@ -90,7 +90,7 @@ const Main: FC<IMainProps> = () => {
     setCurrInputs(inputs)
     setChatStarted()
     // parse variables in introduction
-    setChatList(generateNewChatListWithOpenStatement('', inputs))
+    setChatList(generateNewChatListWithOpenStatement('', null, inputs))
   }
   const hasSetInputs = (() => {
     if (!isNewConversation)
@@ -101,6 +101,7 @@ const Main: FC<IMainProps> = () => {
 
   const conversationName = currConversationInfo?.name || t('app.chat.newChatDefaultName') as string
   const conversationIntroduction = currConversationInfo?.introduction || ''
+  const conversationSuggestedQuestion = currConversationInfo?.suggested_questions || null
 
   const handleConversationSwitch = () => {
     if (!inited)
@@ -108,15 +109,20 @@ const Main: FC<IMainProps> = () => {
 
     // update inputs of current conversation
     let notSyncToStateIntroduction = ''
+    let notSyncToStateSuggestedQuestion: string[] | null = null
     let notSyncToStateInputs: Record<string, any> | undefined | null = {}
     if (!isNewConversation) {
       const item = conversationList.find(item => item.id === currConversationId)
       notSyncToStateInputs = item?.inputs || {}
       setCurrInputs(notSyncToStateInputs as any)
       notSyncToStateIntroduction = item?.introduction || ''
+      notSyncToStateSuggestedQuestion = item?.suggested_questions || null
+
+      console.log('test', notSyncToStateIntroduction, notSyncToStateSuggestedQuestion)
       setExistConversationInfo({
         name: item?.name || '',
         introduction: notSyncToStateIntroduction,
+        suggested_questions: notSyncToStateSuggestedQuestion
       })
     }
     else {
@@ -128,7 +134,7 @@ const Main: FC<IMainProps> = () => {
     if (!isNewConversation && !conversationIdChangeBecauseOfNew && !isResponding) {
       fetchChatList(currConversationId).then((res: any) => {
         const { data } = res
-        const newChatList: ChatItem[] = generateNewChatListWithOpenStatement(notSyncToStateIntroduction, notSyncToStateInputs)
+        const newChatList: ChatItem[] = generateNewChatListWithOpenStatement(notSyncToStateIntroduction, notSyncToStateSuggestedQuestion, notSyncToStateInputs)
 
         data.forEach((item: any) => {
           newChatList.push({
@@ -192,16 +198,24 @@ const Main: FC<IMainProps> = () => {
         name: t('app.chat.newChatDefaultName'),
         inputs: newConversationInputs,
         introduction: conversationIntroduction,
+        suggested_questions: conversationSuggestedQuestion,
       })
     }))
   }
 
   // sometime introduction is not applied to state
-  const generateNewChatListWithOpenStatement = (introduction?: string, inputs?: Record<string, any> | null) => {
+  const generateNewChatListWithOpenStatement = (introduction?: string, suggestedQuestion?: string[] | null, inputs?: Record<string, any> | null) => {
     let calculatedIntroduction = introduction || conversationIntroduction || ''
+    let calculatedSuggestedQuestion = suggestedQuestion || conversationSuggestedQuestion || []
     const calculatedPromptVariables = inputs || currInputs || null
     if (calculatedIntroduction && calculatedPromptVariables)
       calculatedIntroduction = replaceVarWithValues(calculatedIntroduction, promptConfig?.prompt_variables || [], calculatedPromptVariables)
+
+    console.log('calculatedIntro', calculatedIntroduction)
+    console.log('calculatedSuggestedQuestions', calculatedSuggestedQuestion)
+
+    console.log('intro', introduction)
+    console.log('ques', suggestedQuestion)
 
     const openStatement = {
       id: `${Date.now()}`,
@@ -209,8 +223,9 @@ const Main: FC<IMainProps> = () => {
       isAnswer: true,
       feedbackDisabled: true,
       isOpeningStatement: isShowPrompt,
+      suggestedQuestions: calculatedSuggestedQuestion,
     }
-    if (calculatedIntroduction)
+    if (calculatedIntroduction || calculatedSuggestedQuestion.length > 0)
       return [openStatement]
 
     return []
@@ -231,16 +246,23 @@ const Main: FC<IMainProps> = () => {
         if (error) {
           Toast.notify({ type: 'error', message: error })
           throw new Error(error)
-          return
         }
         const _conversationId = getConversationIdFromStorage(APP_ID)
         const isNotNewConversation = conversations.some(item => item.id === _conversationId)
 
         // fetch new conversation info
-        const { user_input_form, opening_statement: introduction, file_upload, system_parameters }: any = appParams
+        const { user_input_form, opening_statement: introduction, file_upload, system_parameters, suggested_questions }: any = appParams
         setLocaleOnClient(APP_INFO.default_language, true)
+
+        // Add suggested_questions to each conversation
+        const conversationsWithSuggestions = conversations.map(conversation => ({
+          ...conversation, suggested_questions: suggested_questions,
+        }))
+
+        console.log('suggestedQuestion', suggested_questions)
         setNewConversationInfo({
           name: t('app.chat.newChatDefaultName'),
+          suggested_questions: suggested_questions,
           introduction,
         })
         const prompt_variables = userInputsFormToPromptVariables(user_input_form)
@@ -252,7 +274,9 @@ const Main: FC<IMainProps> = () => {
           ...file_upload?.image,
           image_file_size_limit: system_parameters?.system_parameters || 0,
         })
-        setConversationList(conversations as ConversationItem[])
+
+        console.log('conver', conversationsWithSuggestions)
+        setConversationList(conversationsWithSuggestions as ConversationItem[])
 
         if (isNotNewConversation)
           setCurrConversationId(_conversationId, APP_ID, false)
@@ -428,6 +452,7 @@ const Main: FC<IMainProps> = () => {
 
           const newAllConversations = produce(allConversations, (draft: any) => {
             draft[0].name = newItem.name
+            draft[0].suggested_questions = conversationSuggestedQuestion
           })
           setConversationList(newAllConversations as any)
         }
@@ -619,58 +644,61 @@ const Main: FC<IMainProps> = () => {
     return <Loading type='app' />
 
   return (
-    <div className='bg-gray-100'>
-      <Header
-        title={APP_INFO.title}
-        isMobile={isMobile}
-        onShowSideBar={showSidebar}
-        onCreateNewChat={() => handleConversationIdChange('-1')}
-      />
-      <div className="flex rounded-t-2xl bg-white overflow-hidden">
-        {/* sidebar */}
-        {!isMobile && renderSidebar()}
-        {isMobile && isShowSidebar && (
-          <div className='fixed inset-0 z-50'
-            style={{ backgroundColor: 'rgba(35, 56, 118, 0.2)' }}
-            onClick={hideSidebar}
-          >
-            <div className='inline-block' onClick={e => e.stopPropagation()}>
-              {renderSidebar()}
-            </div>
-          </div>
-        )}
-        {/* main */}
-        <div className='flex-grow flex flex-col h-[calc(100vh_-_3rem)] overflow-y-auto'>
-          <ConfigSence
-            conversationName={conversationName}
-            hasSetInputs={hasSetInputs}
-            isPublicVersion={isShowPrompt}
-            siteInfo={APP_INFO}
-            promptConfig={promptConfig}
-            onStartChat={handleStartChat}
-            canEditInputs={canEditInputs}
-            savedInputs={currInputs as Record<string, any>}
-            onInputsChange={setCurrInputs}
-          ></ConfigSence>
+    // <div className='bg-gray-100'>
+    //   <Header
+    //     title={APP_INFO.title}
+    //     isMobile={isMobile}
+    //     onShowSideBar={showSidebar}
+    //     onCreateNewChat={() => handleConversationIdChange('-1')}
+    //   />
 
-          {
-            hasSetInputs && (
-              <div className='relative grow h-[200px] pc:w-[794px] max-w-full mobile:w-full pb-[66px] mx-auto mb-3.5 overflow-hidden'>
-                <div className='h-full overflow-y-auto' ref={chatListDomRef}>
-                  <Chat
-                    chatList={chatList}
-                    onSend={handleSend}
-                    onFeedback={handleFeedback}
-                    isResponding={isResponding}
-                    checkCanSend={checkCanSend}
-                    visionConfig={visionConfig}
-                  />
-                </div>
-              </div>)
-          }
+    <div className="flex rounded-t-2xl bg-white h-screen">
+      {/* sidebar */}
+      {/* {!isMobile && renderSidebar()}
+      {isMobile && isShowSidebar && (
+        <div className='fixed inset-0 z-50'
+          style={{ backgroundColor: 'rgba(35, 56, 118, 0.2)' }}
+          onClick={hideSidebar}
+        >
+          <div className='inline-block' onClick={e => e.stopPropagation()}>
+            {renderSidebar()}
+          </div>
         </div>
+      )} */}
+
+      {/* main */}
+      <div className='flex-grow flex flex-col overflow-hidden'>
+        <ConfigSence
+          conversationName={conversationName}
+          hasSetInputs={hasSetInputs}
+          isPublicVersion={isShowPrompt}
+          siteInfo={APP_INFO}
+          promptConfig={promptConfig}
+          onStartChat={handleStartChat}
+          canEditInputs={canEditInputs}
+          savedInputs={currInputs as Record<string, any>}
+          onInputsChange={setCurrInputs}
+        ></ConfigSence>
+
+        {
+          hasSetInputs && (
+            <div className='flex-grow relative max-w-[794px] w-full mx-auto mb-3.5 pb-[66px] overflow-hidden'>
+              <div className='h-full overflow-y-auto' ref={chatListDomRef}>
+                <Chat
+                  chatList={chatList}
+                  onSend={handleSend}
+                  onFeedback={handleFeedback}
+                  isResponding={isResponding}
+                  checkCanSend={checkCanSend}
+                  visionConfig={visionConfig}
+                />
+              </div>
+            </div>)
+        }
       </div>
     </div>
+
+    // </div>
   )
 }
 

@@ -82,11 +82,11 @@ const Welcome: FC<IWelcomeProps> = ({
 
   const renderHeader = () => {
     return (
-      <div className='absolute top-0 left-0 right-0 flex items-center justify-between border-b border-gray-100 mobile:h-12 tablet:h-16 px-8 bg-white'>
-        <div className='text-gray-900'>{conversationName}</div>
+      <div className="absolute top-0 left-0 right-0 flex items-center justify-center border-b border-gray-100 mobile:h-12 tablet:h-16 px-8 bg-white">
+        <div className="text-gray-900">{conversationName}</div>
       </div>
-    )
-  }
+    );
+  };
 
   const renderInputs = () => {
     return (
@@ -340,7 +340,7 @@ const Welcome: FC<IWelcomeProps> = ({
               </div>
               : <div>
               </div>}
-            <a className='flex items-center pr-3 space-x-3' href="https://dify.ai/" target="_blank">
+            <a className='flex items-center pr-3 space-x-3' href="https://sql.com.my/" target="_blank">
               <span className='uppercase'>{t('app.chat.powerBy')}</span>
               <FootLogo />
             </a>

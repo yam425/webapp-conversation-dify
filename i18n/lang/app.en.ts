@@ -1,6 +1,6 @@
 const translation = {
   common: {
-    welcome: 'Welcome to use',
+    welcome: 'Welcome to',
     appUnavailable: 'App is unavailable',
     appUnkonwError: 'App is unavailable',
   },
@@ -13,15 +13,12 @@ const translation = {
     privatePromptConfigTitle: 'Conversation settings',
     publicPromptConfigTitle: 'Initial Prompt',
     configStatusDes: 'Before start, you can modify conversation settings',
-    configDisabled:
-      'Previous session settings have been used for this session.',
+    configDisabled: 'Previous session settings have been used for this session.',
     startChat: 'Start Chat',
-    privacyPolicyLeft:
-      'Please read the ',
-    privacyPolicyMiddle:
-      'privacy policy',
-    privacyPolicyRight:
-      ' provided by the app developer.',
+    privacyPolicyLeft: 'Please read the ',
+    privacyPolicyMiddle: 'privacy policy',
+    privacyPolicyRight: ' provided by the app developer.',
+    textAreaHint: 'Ask me anything'
   },
   errorMessage: {
     valueOfVarRequired: 'Variables value can not be empty',

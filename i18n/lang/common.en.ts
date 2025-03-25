@@ -14,8 +14,8 @@ const translation = {
     search: 'Search',
     send: 'Send',
     lineBreak: 'Line break',
-    like: 'like',
-    dislike: 'dislike',
+    like: 'Like',
+    dislike: 'Dislike',
     ok: 'OK',
   },
   imageUploader: {
