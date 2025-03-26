@@ -41,9 +41,14 @@ const Main: FC<IMainProps> = () => {
   const [inited, setInited] = useState<boolean>(false)
 
   const initialSidebarState = (() => {
-    const savedValue = sessionStorage.getItem('isShowSidebar');
-    return savedValue ? JSON.parse(savedValue) : (isMobile ? false : true);
-  })();
+    if (typeof window !== 'undefined') {
+      const savedValue = sessionStorage.getItem('isShowSidebar')
+      const width = window.innerWidth
+      const defaultState = width < 768 ? false : true
+      return savedValue ? JSON.parse(savedValue) : defaultState
+    }
+    return false
+  })()
   const [isShowSidebar, { setTrue: showSidebar, setFalse: hideSidebar }] = useBoolean(initialSidebarState)
 
   const [visionConfig, setVisionConfig] = useState<VisionSettings | undefined>({
