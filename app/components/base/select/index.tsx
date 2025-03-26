@@ -3,7 +3,7 @@ import type { FC } from 'react'
 import React, { Fragment, useEffect, useState } from 'react'
 import { Combobox, Listbox, Transition } from '@headlessui/react'
 import classNames from 'classnames'
-import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/20/solid'
+import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from 'lucide-react'
 
 const defaultItems = [
   { value: 1, name: 'option1' },

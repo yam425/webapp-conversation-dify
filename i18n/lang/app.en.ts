@@ -5,7 +5,7 @@ const translation = {
     appUnkonwError: 'App is unavailable',
   },
   chat: {
-    newChat: 'New chat',
+    newChat: 'New Chat',
     newChatDefaultName: 'New conversation',
     openingStatementTitle: 'Opening statement',
     powerBy: 'Powered by',

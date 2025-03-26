@@ -1,7 +1,7 @@
 'use client'
 import type { FC } from 'react'
 import React from 'react'
-import { HandThumbDownIcon, HandThumbUpIcon } from '@heroicons/react/24/outline'
+import { ThumbsDownIcon, ThumbsUpIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import LoadingAnim from '../loading-anim'
 import type { FeedbackFunc } from '../type'
@@ -32,7 +32,7 @@ const OpeningStatementIcon: FC<{ className?: string }> = ({ className }) => (
 )
 
 const RatingIcon: FC<{ isLike: boolean }> = ({ isLike }) => {
-  return isLike ? <HandThumbUpIcon className='w-4 h-4' /> : <HandThumbDownIcon className='w-4 h-4' />
+  return isLike ? <ThumbsUpIcon className='w-4 h-4' /> : <ThumbsDownIcon className='w-4 h-4' />
 }
 
 const EditIcon: FC<{ className?: string }> = ({ className }) => {

@@ -3,9 +3,7 @@ import type { FC } from 'react'
 import React from 'react'
 import cn from 'classnames'
 import { useTranslation } from 'react-i18next'
-import {
-  PencilIcon,
-} from '@heroicons/react/24/solid'
+import { PanelLeftIcon, PencilIcon } from 'lucide-react'
 import s from './style.module.css'
 import type { AppInfo } from '@/types/app'
 import Button from '@/app/components/base/button'

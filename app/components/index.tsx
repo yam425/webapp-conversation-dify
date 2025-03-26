@@ -40,8 +40,13 @@ const Main: FC<IMainProps> = () => {
   const [isUnknownReason, setIsUnknownReason] = useState<boolean>(false)
   const [promptConfig, setPromptConfig] = useState<PromptConfig | null>(null)
   const [inited, setInited] = useState<boolean>(false)
-  // in mobile, show sidebar by click button
-  const [isShowSidebar, { setTrue: showSidebar, setFalse: hideSidebar }] = useBoolean(false)
+
+  const initialSidebarState = (() => {
+    const savedValue = sessionStorage.getItem('isShowSidebar');
+    return savedValue ? JSON.parse(savedValue) : (isMobile ? false : true);
+  })();
+  const [isShowSidebar, { setTrue: showSidebar, setFalse: hideSidebar }] = useBoolean(initialSidebarState)
+
   const [visionConfig, setVisionConfig] = useState<VisionSettings | undefined>({
     enabled: false,
     number_limits: 2,
@@ -51,8 +56,12 @@ const Main: FC<IMainProps> = () => {
 
   useEffect(() => {
     if (APP_INFO?.title)
-      document.title = `${APP_INFO.title} - Powered by Dify`
+      document.title = `${APP_INFO.title}`
   }, [APP_INFO?.title])
+
+  useEffect(() => {
+    sessionStorage.setItem('isShowSidebar', JSON.stringify(isShowSidebar));
+  }, [isShowSidebar]);
 
   // onData change thought (the produce obj). https://github.com/immerjs/immer/issues/576
   useEffect(() => {
@@ -118,7 +127,6 @@ const Main: FC<IMainProps> = () => {
       notSyncToStateIntroduction = item?.introduction || ''
       notSyncToStateSuggestedQuestion = item?.suggested_questions || null
 
-      console.log('test', notSyncToStateIntroduction, notSyncToStateSuggestedQuestion)
       setExistConversationInfo({
         name: item?.name || '',
         introduction: notSyncToStateIntroduction,
@@ -172,7 +180,7 @@ const Main: FC<IMainProps> = () => {
     }
     // trigger handleConversationSwitch
     setCurrConversationId(id, APP_ID)
-    hideSidebar()
+    isMobile && hideSidebar()
   }
 
   /*
@@ -210,12 +218,6 @@ const Main: FC<IMainProps> = () => {
     const calculatedPromptVariables = inputs || currInputs || null
     if (calculatedIntroduction && calculatedPromptVariables)
       calculatedIntroduction = replaceVarWithValues(calculatedIntroduction, promptConfig?.prompt_variables || [], calculatedPromptVariables)
-
-    console.log('calculatedIntro', calculatedIntroduction)
-    console.log('calculatedSuggestedQuestions', calculatedSuggestedQuestion)
-
-    console.log('intro', introduction)
-    console.log('ques', suggestedQuestion)
 
     const openStatement = {
       id: `${Date.now()}`,
@@ -259,7 +261,6 @@ const Main: FC<IMainProps> = () => {
           ...conversation, suggested_questions: suggested_questions,
         }))
 
-        console.log('suggestedQuestion', suggested_questions)
         setNewConversationInfo({
           name: t('app.chat.newChatDefaultName'),
           suggested_questions: suggested_questions,
@@ -275,7 +276,6 @@ const Main: FC<IMainProps> = () => {
           image_file_size_limit: system_parameters?.system_parameters || 0,
         })
 
-        console.log('conver', conversationsWithSuggestions)
         setConversationList(conversationsWithSuggestions as ConversationItem[])
 
         if (isNotNewConversation)
@@ -633,6 +633,7 @@ const Main: FC<IMainProps> = () => {
         onCurrentIdChange={handleConversationIdChange}
         currentId={currConversationId}
         copyRight={APP_INFO.copyright || APP_INFO.title}
+        isShowSidebar={isShowSidebar}
       />
     )
   }
@@ -644,30 +645,29 @@ const Main: FC<IMainProps> = () => {
     return <Loading type='app' />
 
   return (
-    // <div className='bg-gray-100'>
-    //   <Header
-    //     title={APP_INFO.title}
-    //     isMobile={isMobile}
-    //     onShowSideBar={showSidebar}
-    //     onCreateNewChat={() => handleConversationIdChange('-1')}
-    //   />
-
     <div className="flex rounded-t-2xl bg-white h-screen">
       {/* sidebar */}
-      {/* {!isMobile && renderSidebar()}
-      {isMobile && isShowSidebar && (
-        <div className='fixed inset-0 z-50'
-          style={{ backgroundColor: 'rgba(35, 56, 118, 0.2)' }}
+      {!isMobile && (
+        <div className={`shrink-0 transition-all duration-300 ease-in-out ${isShowSidebar ? 'w-[244px]' : 'w-0 overflow-hidden'}`}>
+          {renderSidebar()}
+        </div>
+      )}
+
+      {isMobile && (
+        <div className={`fixed inset-0 z-50 transition-opacity duration-300 ${isShowSidebar ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+          style={{ backgroundColor: 'rgba(76, 76, 76, 0.4)' }}
           onClick={hideSidebar}
         >
-          <div className='inline-block' onClick={e => e.stopPropagation()}>
+          <div className='inline-block h-full' onClick={e => e.stopPropagation()}>
             {renderSidebar()}
           </div>
         </div>
-      )} */}
+      )}
 
       {/* main */}
-      <div className='flex-grow flex flex-col overflow-hidden'>
+      <div className={`flex-grow flex flex-col overflow-hidden transition-all duration-300 ease-in-out 
+          ${!isMobile && isShowSidebar ? 'ml-0' : !isMobile ? 'ml-0' : ''}`}
+      >
         <ConfigSence
           conversationName={conversationName}
           hasSetInputs={hasSetInputs}
@@ -678,6 +678,9 @@ const Main: FC<IMainProps> = () => {
           canEditInputs={canEditInputs}
           savedInputs={currInputs as Record<string, any>}
           onInputsChange={setCurrInputs}
+          onShowSideBar={isShowSidebar ? hideSidebar : showSidebar}
+          onCreateNewChat={() => handleConversationIdChange('-1')}
+          conversationListLength={conversationList.length}
         ></ConfigSence>
 
         {
@@ -697,8 +700,6 @@ const Main: FC<IMainProps> = () => {
         }
       </div>
     </div>
-
-    // </div>
   )
 }
 

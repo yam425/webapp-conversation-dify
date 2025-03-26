@@ -3,12 +3,7 @@ import classNames from 'classnames'
 import type { ReactNode } from 'react'
 import React, { useEffect, useState } from 'react'
 import { createRoot } from 'react-dom/client'
-import {
-  CheckCircleIcon,
-  ExclamationTriangleIcon,
-  InformationCircleIcon,
-  XCircleIcon,
-} from '@heroicons/react/20/solid'
+import { CircleCheckIcon, TriangleAlertIcon, InfoIcon, CircleXIcon } from 'lucide-react'
 import { createContext, useContext } from 'use-context-selector'
 
 export type IToastProps = {
@@ -47,10 +42,10 @@ const Toast = ({
   )}>
     <div className="flex">
       <div className="flex-shrink-0">
-        {type === 'success' && <CheckCircleIcon className="w-5 h-5 text-green-400" aria-hidden="true" />}
-        {type === 'error' && <XCircleIcon className="w-5 h-5 text-red-400" aria-hidden="true" />}
-        {type === 'warning' && <ExclamationTriangleIcon className="w-5 h-5 text-yellow-400" aria-hidden="true" />}
-        {type === 'info' && <InformationCircleIcon className="w-5 h-5 text-blue-400" aria-hidden="true" />}
+        {type === 'success' && <CircleCheckIcon className="w-5 h-5 text-green-400" aria-hidden="true" />}
+        {type === 'error' && <CircleXIcon className="w-5 h-5 text-red-400" aria-hidden="true" />}
+        {type === 'warning' && <TriangleAlertIcon className="w-5 h-5 text-yellow-400" aria-hidden="true" />}
+        {type === 'info' && <InfoIcon className="w-5 h-5 text-blue-400" aria-hidden="true" />}
       </div>
       <div className="ml-3">
         <h3 className={

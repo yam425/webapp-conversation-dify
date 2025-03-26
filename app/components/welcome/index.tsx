@@ -9,9 +9,12 @@ import type { AppInfo, PromptConfig } from '@/types/app'
 import Toast from '@/app/components/base/toast'
 import Select from '@/app/components/base/select'
 import { DEFAULT_VALUE_MAX_LEN } from '@/config'
+import { PanelLeftIcon, PlusIcon } from 'lucide-react'
+import Button from '../base/button'
 
 // regex to match the {{}} and replace it with a span
 const regex = /\{\{([^}]+)\}\}/g
+const MAX_CONVERSATION_LENTH = 20
 
 export type IWelcomeProps = {
   conversationName: string
@@ -23,6 +26,9 @@ export type IWelcomeProps = {
   canEditInputs: boolean
   savedInputs: Record<string, any>
   onInputsChange: (inputs: Record<string, any>) => void
+  onShowSideBar: () => void
+  onCreateNewChat?: () => void
+  conversationListLength: number
 }
 
 const Welcome: FC<IWelcomeProps> = ({
@@ -35,6 +41,9 @@ const Welcome: FC<IWelcomeProps> = ({
   canEditInputs,
   savedInputs,
   onInputsChange,
+  onShowSideBar,
+  onCreateNewChat,
+  conversationListLength,
 }) => {
   const { t } = useTranslation()
   const hasVar = promptConfig.prompt_variables.length > 0
@@ -76,13 +85,33 @@ const Welcome: FC<IWelcomeProps> = ({
   })()
 
   const { notify } = Toast
+  const isMaxExceeded = conversationListLength > MAX_CONVERSATION_LENTH;
   const logError = (message: string) => {
     notify({ type: 'error', message, duration: 3000 })
+  }
+  const logWarning = (message: string) => {
+    notify({ type: 'warning', message, duration: 3000 });
   }
 
   const renderHeader = () => {
     return (
-      <div className="absolute top-0 left-0 right-0 flex items-center justify-center border-b border-gray-100 mobile:h-12 tablet:h-16 px-8 bg-white">
+      <div className="absolute top-0 left-0 right-0 flex items-center justify-start border-b border-gray-100 h-14 px-4 bg-white">
+        <Button className="h-8 px-2 flex items-center justify-center mr-1 text-primary-600" onClick={() => onShowSideBar?.()}>
+          <PanelLeftIcon className="h-4 w-4" />
+        </Button>
+        <Button
+          onClick={() => {
+            if (isMaxExceeded) {
+              logWarning(`Maximum conversation limit (${MAX_CONVERSATION_LENTH}) reached!`)
+              return;
+            }
+            onCreateNewChat?.();
+          }}
+          className={`h-8 px-2 flex items-center justify-center mr-4 text-sm ${isMaxExceeded ? 'text-gray-400 bg-gray-100 cursor-not-allowed' : 'text-primary-600'
+            }`}
+        >
+          <PlusIcon className="mr-2 h-4 w-4" /> {t('app.chat.newChat')}
+        </Button>
         <div className="text-gray-900">{conversationName}</div>
       </div>
     );
@@ -305,8 +334,8 @@ const Welcome: FC<IWelcomeProps> = ({
   }
 
   return (
-    <div className='relative mobile:min-h-[48px] tablet:min-h-[64px]'>
-      {hasSetInputs && renderHeader()}
+    <div className='relative min-h-[48px]'>
+      {renderHeader()}
       <div className='mx-auto pc:w-[794px] max-w-full mobile:w-full px-3.5'>
         {/*  Has't set inputs  */}
         {
