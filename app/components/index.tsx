@@ -194,8 +194,12 @@ const Main: FC<IMainProps> = () => {
   const chatListDomRef = useRef<HTMLDivElement>(null)
   useEffect(() => {
     // scroll to bottom
-    if (chatListDomRef.current)
-      chatListDomRef.current.scrollTop = chatListDomRef.current.scrollHeight
+    if (chatListDomRef.current) {
+      chatListDomRef.current.scrollTo({
+        top: chatListDomRef.current.scrollHeight,
+        behavior: 'smooth'
+      });
+    }
   }, [chatList, currConversationId])
   // user can not edit inputs if user had send message
   const canEditInputs = !chatList.some(item => item.isAnswer === false) && isNewConversation
