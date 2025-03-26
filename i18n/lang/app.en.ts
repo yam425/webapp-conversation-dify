@@ -18,12 +18,18 @@ const translation = {
     privacyPolicyLeft: 'Please read the ',
     privacyPolicyMiddle: 'privacy policy',
     privacyPolicyRight: ' provided by the app developer.',
-    textAreaHint: 'Ask me anything'
+    textAreaHint: 'Ask me anything',
+    deleteTitle: 'Delete Chat',
+    deleteDescription: 'Are your sure to delete this chat?',
+    deleteButton:'Delete',
+    cancelButton:'Cancel',
+    deleteSuccess: 'Success',
   },
   errorMessage: {
     valueOfVarRequired: 'Variables value can not be empty',
     waitForResponse:
       'Please wait for the response to the previous message to complete.',
+    deleteFailed: 'Failed to delete the conversation, please try again!'
   },
   variableTable: {
     optional: 'Optional',

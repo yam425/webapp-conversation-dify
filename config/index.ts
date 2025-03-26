@@ -4,7 +4,7 @@ export const API_KEY = `${process.env.NEXT_PUBLIC_APP_KEY}`
 export const API_URL = `${process.env.NEXT_PUBLIC_API_URL}`
 export const APP_INFO: AppInfo = {
   title: 'SQL Assistant',
-  description: 'Hi there! 👋 I’m your SQL Assistant🤖, here to help with all your questions about our products and services. Feel free to ask me anything!',
+  description: 'Hello! I’m your SQL Assistant, here to help with all your questions about our products and services. Ready to get started? Click [Start Chat] now!',
   copyright: '',
   privacy_policy: '',
   default_language: 'en',

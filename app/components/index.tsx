@@ -9,8 +9,7 @@ import useConversation from '@/hooks/use-conversation'
 import Toast from '@/app/components/base/toast'
 import Sidebar from '@/app/components/sidebar'
 import ConfigSence from '@/app/components/config-scence'
-import Header from '@/app/components/header'
-import { fetchAppParams, fetchChatList, fetchConversations, generationConversationName, sendChatMessage, updateFeedback } from '@/service'
+import { deleteConversation, fetchAppParams, fetchChatList, fetchConversations, generationConversationName, sendChatMessage, updateFeedback } from '@/service'
 import type { ChatItem, ConversationItem, Feedbacktype, PromptConfig, VisionFile, VisionSettings } from '@/types/app'
 import { Resolution, TransferMethod, WorkflowRunningStatus } from '@/types/app'
 import Chat from '@/app/components/chat'
@@ -624,6 +623,40 @@ const Main: FC<IMainProps> = () => {
     notify({ type: 'success', message: t('common.api.success') })
   }
 
+  const handleConversationDelete = async (id: string) => {
+    try {
+      await deleteConversation(id)
+      const conversationData = await fetchConversations()
+
+      const { data: conversations, error } = conversationData as { data: ConversationItem[]; error: string }
+      if (error) {
+        Toast.notify({ type: 'error', message: error })
+        throw new Error(error)
+      }
+
+      if (getCurrConversationId() === id) {
+        setConversationList(produce(conversations, (draft) => {
+          draft.unshift({
+            id: '-1',
+            name: t('app.chat.newChatDefaultName'),
+            inputs: newConversationInputs,
+            introduction: conversationIntroduction,
+            suggested_questions: conversationSuggestedQuestion,
+          })
+        }))
+        setCurrConversationId('-1', APP_ID, false)
+      }
+      else {
+        setConversationList(conversations)
+      }
+
+      notify({ type: 'success', message: t('app.chat.deleteSuccess'), duration: 3000 })
+    }
+    catch (e: any) {
+      notify({ type: 'error', message: `${t('app.errorMessage.deleteFailed')}${'message' in e ? `: ${e.message}` : ''}`, duration: 3000 })
+    }
+  }
+
   const renderSidebar = () => {
     if (!APP_ID || !APP_INFO || !promptConfig)
       return null
@@ -634,6 +667,7 @@ const Main: FC<IMainProps> = () => {
         currentId={currConversationId}
         copyRight={APP_INFO.copyright || APP_INFO.title}
         isShowSidebar={isShowSidebar}
+        onConversationDelete={handleConversationDelete}
       />
     )
   }

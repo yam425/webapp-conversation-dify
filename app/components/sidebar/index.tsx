@@ -1,8 +1,11 @@
-import React from 'react'
+import React, { useState } from 'react'
 import type { FC } from 'react'
 import type { ConversationItem } from '@/types/app'
 import Link from 'next/link'
 import { APP_INFO } from '@/config'
+import { Trash2Icon } from 'lucide-react'
+import { ConfirmationDialog } from '../base/dialog'
+import { useTranslation } from 'react-i18next'
 
 function classNames(...classes: any[]) {
   return classes.filter(Boolean).join(' ')
@@ -14,6 +17,7 @@ export type ISidebarProps = {
   onCurrentIdChange: (id: string) => void
   list: ConversationItem[]
   isShowSidebar: boolean
+  onConversationDelete: (id: string) => void
 }
 
 const Sidebar: FC<ISidebarProps> = ({
@@ -22,10 +26,15 @@ const Sidebar: FC<ISidebarProps> = ({
   onCurrentIdChange,
   list,
   isShowSidebar,
+  onConversationDelete,
 }) => {
+  const { t } = useTranslation()
+  const [showConfirmDelete, setShowConfirmDelete] = useState(false)
+  const [deleteId, setDeleteId] = useState('')
+
   return (
     <div
-      className={`shrink-0 flex flex-col overflow-y-auto bg-white pc:w-[244px] tablet:w-[192px] mobile:w-[240px] 
+      className={`shrink-0 flex flex-col overflow-y-auto bg-white w-[240px] 
         border-r border-gray-200 h-screen transition-all ease-in-out duration-300 
         ${isShowSidebar ? 'translate-x-0' : '-translate-x-full mobile:absolute'}`}
     >
@@ -42,7 +51,6 @@ const Sidebar: FC<ISidebarProps> = ({
           const isCurrent = item.id === currentId
           return (
             <div
-              onClick={() => onCurrentIdChange(item.id)}
               key={item.id}
               className={classNames(
                 isCurrent
@@ -51,13 +59,40 @@ const Sidebar: FC<ISidebarProps> = ({
                 'group flex items-center rounded-md px-2 py-2 text-sm font-medium cursor-pointer',
               )}
             >
-              {item.name}
+              <span onClick={() => onCurrentIdChange(item.id)} className='flex-1'>
+                {item.name}
+              </span>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation(); // Prevent triggering onCurrentIdChange
+                  setShowConfirmDelete(true);
+                  setDeleteId(item.id)
+                }}
+                className='mobile:opacity-100 pc:opacity-0 mobile:px-2 pc:px-1 group-hover:opacity-100 transition-opacity duration-200 text-gray-500 hover:text-red-500'
+              >
+                <Trash2Icon className="w-4 h-4" />
+              </button>
             </div>
           )
         })}
       </nav>
-      <div className="flex flex-shrink-0 pr-4 pb-4 pl-4">
-        <div className="text-gray-400 font-normal text-xs">© {copyRight} {(new Date()).getFullYear()}</div>
+      {showConfirmDelete && (
+        <ConfirmationDialog
+          isOpen={showConfirmDelete}
+          onClose={() => setShowConfirmDelete(false)}
+          onConfirm={() => {
+            setShowConfirmDelete(false)
+            onConversationDelete(deleteId)
+          }}
+          title={t('app.chat.deleteTitle')}
+          description={t('app.chat.deleteDescription')}
+          confirmText={t('app.chat.deleteButton')}
+          cancelText={t('app.chat.cancelButton')}
+        />
+      )}
+
+      <div className='flex flex-shrink-0 pr-4 pb-4 pl-4'>
+        <div className='text-gray-400 font-normal text-xs'>© {copyRight} {(new Date()).getFullYear()}</div>
       </div>
     </div>
   )
