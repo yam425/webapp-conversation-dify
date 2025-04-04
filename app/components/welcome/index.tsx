@@ -96,9 +96,9 @@ const Welcome: FC<IWelcomeProps> = ({
   const renderHeader = () => {
     return (
       <div className="absolute top-0 left-0 right-0 flex items-center justify-start border-b border-gray-100 h-14 px-4 bg-white">
-        <Button className="h-8 px-2 flex items-center justify-center mr-1 text-primary-600" onClick={() => onShowSideBar?.()}>
+        {/* <Button className="h-8 px-2 flex items-center justify-center mr-1 text-primary-600" onClick={() => onShowSideBar?.()}>
           <PanelLeftIcon className="h-4 w-4" />
-        </Button>
+        </Button> */}
         <Button
           onClick={() => {
             if (isMaxExceeded) {
@@ -106,11 +106,12 @@ const Welcome: FC<IWelcomeProps> = ({
               return;
             }
             onCreateNewChat?.();
+            handleChat();
           }}
-          className={`h-8 px-2 flex items-center justify-center mr-4 text-sm ${isMaxExceeded ? 'text-gray-400 bg-gray-100 cursor-not-allowed' : 'text-primary-600'
+          className={`px-2 flex items-center justify-center mr-8 text-sm ${isMaxExceeded ? 'text-gray-400 bg-gray-100 cursor-not-allowed' : 'text-primary-600'
             }`}
         >
-          <PlusIcon className="mr-2 h-4 w-4" /> {t('app.chat.newChat')}
+          <PlusIcon className="h-4 w-4" />
         </Button>
         <div className="text-gray-900">{conversationName}</div>
       </div>
@@ -335,7 +336,7 @@ const Welcome: FC<IWelcomeProps> = ({
 
   return (
     <div className='relative min-h-[48px]'>
-      {renderHeader()}
+      {hasSetInputs && renderHeader()}
       <div className='mx-auto pc:w-[794px] max-w-full mobile:w-full px-3.5'>
         {/*  Has't set inputs  */}
         {

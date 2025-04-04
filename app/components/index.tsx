@@ -261,17 +261,16 @@ const Main: FC<IMainProps> = () => {
         const isNotNewConversation = conversations.some(item => item.id === _conversationId)
 
         // fetch new conversation info
-        const { user_input_form, opening_statement: introduction, file_upload, system_parameters, suggested_questions }: any = appParams
+        const { user_input_form, opening_statement: introduction, file_upload, system_parameters }: any = appParams
         setLocaleOnClient(APP_INFO.default_language, true)
 
         // Add suggested_questions to each conversation
         const conversationsWithSuggestions = conversations.map(conversation => ({
-          ...conversation, suggested_questions: suggested_questions,
+          ...conversation,
         }))
 
         setNewConversationInfo({
           name: t('app.chat.newChatDefaultName'),
-          suggested_questions: suggested_questions,
           introduction,
         })
         const prompt_variables = userInputsFormToPromptVariables(user_input_form)
@@ -689,7 +688,7 @@ const Main: FC<IMainProps> = () => {
 
   return (
     <div className="flex rounded-t-2xl bg-white h-screen">
-      {/* sidebar */}
+      {/* sidebar
       {!isMobile && (
         <div className={`shrink-0 transition-all duration-300 ease-in-out ${isShowSidebar ? 'w-[244px]' : 'w-0 overflow-hidden'}`}>
           {renderSidebar()}
@@ -705,12 +704,10 @@ const Main: FC<IMainProps> = () => {
             {renderSidebar()}
           </div>
         </div>
-      )}
+      )} */}
 
       {/* main */}
-      <div className={`flex-grow flex flex-col overflow-hidden transition-all duration-300 ease-in-out 
-          ${!isMobile && isShowSidebar ? 'ml-0' : !isMobile ? 'ml-0' : ''}`}
-      >
+      <div className='flex-grow flex flex-col overflow-hidden'>
         <ConfigSence
           conversationName={conversationName}
           hasSetInputs={hasSetInputs}
